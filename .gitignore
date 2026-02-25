@@ -6,3 +6,13 @@ OSSOS-model.out
 *.log
 *.ipynb
 *.so
+*.o
+*.mod
+Classical/Classical
+Commons/Driver
+Commons/GiMeObj.f95
+Detached/Detached
+Inner/Inner
+Plutinos/Plutinos
+Scattering/Scattering
+Twotinos/Twotinos
