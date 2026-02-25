@@ -1,0 +1,8 @@
+.idea
+__pycache__
+build
+ModelUsed.dat
+OSSOS-model.out
+*.log
+*.ipynb
+*.so
