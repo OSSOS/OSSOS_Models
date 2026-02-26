@@ -150,6 +150,50 @@ contains
     return
   end function Variably_tapered_diff
 
+  real (kind=8) function onecomp (nparam, param, inc)
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+! This routine returns the unnormalized inclination "probability"
+! density of Brown.
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+!
+! J-M. Petit  Observatoire de Besancon
+! Version 1 : February 2007
+!
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+! INPUT
+!     nparam: Number of parameters (I4)
+!     param : Parameters (n*R8)
+!     inc   : Inclination [rad] (R8)
+!
+! OUPUT
+!     onecomp: Value of the probability (R8)
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+!f2py intent(in) nparam
+!f2py intent(in), depend(nparam) :: param
+!f2py intent(in) inc
+    implicit none
+
+    integer (kind=4), intent(in) :: nparam
+    real (kind=8), intent(in) :: param(*), inc
+    real (kind=8), parameter :: Pi = 3.141592653589793238d0, TwoPi = 2.0d0*Pi
+    real (kind=8) :: fe, s1, angle, t1, t3
+
+    if (nparam .ne. 1) stop
+    s1 = param(1)
+    t1 = 2.*s1**2
+    angle = mod(inc, TwoPi)
+    if (angle .gt. Pi) angle = angle - TwoPi
+    t3 = -angle**2
+    if (t3 .lt. -300.d0*t1) then
+       fe = 0.d0
+    else
+       fe = exp(t3/t1)
+    end if
+    onecomp = dsin(angle)*fe
+
+    return
+  end function onecomp
+
   real (kind=8) function offgau (nparam, param, inc)
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 ! This routine returns the unnormalized inclination "probability"
@@ -194,114 +238,6 @@ contains
 
     return
   end function offgau
-
-  real (kind=8) function cold_inc_sq (nparam, param, inc)
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-! This routine returns the unnormalized inclination "probability"
-! density for cold objects.
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-!
-! J-M. Petit  Observatoire de Besancon
-! Version 1 : April 2023, 7th
-!
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-! INPUT
-!     nparam: Number of parameters (I4)
-!     param : Parameters (n*R8)
-!     inc   : Inclination [rad] (R8)
-!
-! OUPUT
-!     cold_inc_sq: Value of the probability (R8)
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-!f2py intent(in) nparam
-!f2py intent(in), depend(nparam) :: param
-!f2py intent(in) inc
-    implicit none
-
-    integer (kind=4), intent(in) :: nparam
-    real (kind=8), intent(in) :: param(*), inc
-    real (kind=8), parameter :: Pi = 3.141592653589793238d0, &
-         TwoPi = 2.0d0*Pi, drad = Pi/180.0d0
-    real (kind=8), save :: angle, a0, p
-    logical, save :: first
-
-    data a0 /5.0d0/, p /1.0d0/
-    data first /.true./
-
-    if (first) then
-       a0 = a0*drad
-       if (nparam .ge. 1) then
-          a0 = param(1)
-       end if
-       if (nparam .ge. 2) then
-          p = param(2)
-       end if
-       first = .false.
-    end if
-
-    angle = mod(inc, TwoPi)
-    if ((angle .gt. 0.0d0) .and. (angle .lt. a0)) then
-       cold_inc_sq = angle**p*(a0**p - angle**p)
-    else
-       cold_inc_sq = 0.0d0
-    end if
-
-    return
-  end function cold_inc_sq
-
-  real (kind=8) function warm_inc_sq (nparam, param, inc)
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-! This routine returns the unnormalized inclination "probability"
-! density for warm objects.
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-!
-! J-M. Petit  Observatoire de Besancon
-! Version 1 : April 2023, 7th
-!
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-! INPUT
-!     nparam: Number of parameters (I4)
-!     param : Parameters (n*R8)
-!     inc   : Inclination [rad] (R8)
-!
-! OUPUT
-!     warm_inc_sq: Value of the probability (R8)
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-!f2py intent(in) nparam
-!f2py intent(in), depend(nparam) :: param
-!f2py intent(in) inc
-    implicit none
-
-    integer (kind=4), intent(in) :: nparam
-    real (kind=8), intent(in) :: param(*), inc
-    real (kind=8), parameter :: Pi = 3.141592653589793238d0, &
-         TwoPi = 2.0d0*Pi, drad = Pi/180.0d0
-    real (kind=8), save :: angle, a0, p
-    logical, save :: first
-
-    data a0 /12.0d0/, p /1.0d0/
-    data first /.true./
-
-    if (first) then
-       a0 = a0*drad
-       if (nparam .ge. 1) then
-          a0 = param(1)
-       end if
-       if (nparam .ge. 2) then
-          p = param(2)
-       end if
-       first = .false.
-    end if
-
-    angle = mod(inc, TwoPi)
-    if ((angle .gt. 0.0d0) .and. (angle .lt. a0)) then
-       warm_inc_sq = angle**p*(a0**p - angle**p)
-    else
-       warm_inc_sq = 0.0d0
-    end if
-
-    return
-  end function warm_inc_sq
 
   real (kind=8) function H_dist_cold_2(seed, nparam, hparam)
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -520,39 +456,157 @@ contains
 
   end function H_draw_hot_5
 
-  real (kind=8) function qhot (np, p, q)
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-! This function returns the unnormalized inclination "probability" of having
-! perihelion distance "q"
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+  subroutine H_diff_hot_6(nparam, hparam, np, hs, dist)
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+! This routine computes the differential distribution of the hot belt H_r,
+! represented by an exponentially tapered exponential, with parameters
+! fitted on the OSSOS cold belt data, then scaled to hot.
+! This version provides a continuous differential function, except for the divot.
+!
+! This version has modified parameters to obtain a cumulative distribution
+! that looks like, and has the same normalisation as H_dist_hot_3.
+!
+! Here, there is a simple divot at given mag, and then the distribution
+! continues according to the expoential taper, simply rescaled by the contrast.
+!
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 !
 ! J-M. Petit  Observatoire de Besancon
-! Version 1 : April 2020
+! Version 1 : June 2024 - From H_dist_hot_5
 !
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 ! INPUT
-!     np    : Number of parameters describing the distribution function (I4)
-!     p     : Array of parameters (np*R8)
-!     q     : Perihelion distance (R8)
+!     nparam: Number of parameters (I4)
+!     hparam: Parameters for asymptotic slope(s) (n*R8)
+!             hparam(1): start of asymptote
+!             hparam(2): contrast at divot
+!             hparam(3): end of distribution
+!     np    : Number of points to return
+!     hs    : Values of H at which we want the distribution
 !
 ! OUTPUT
-!     qhot  : Probability of q
-!
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-! Set of F2PY directives to create a Python module
+!     hs(0) : H_min
+!     dist  : Values of the cumulative distribution
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+!f2py intent(in) nparam
+!f2py intent(in), depend(nparam) :: hparam
 !f2py intent(in) np
-!f2py intent(in) p
-!f2py intent(in) q
+!f2py intent(in, out) hs
+!f2py intent(out) dist
     implicit none
 
-! Calling arguments
-    integer (kind=4), intent(in) :: np
-    real (kind=8), intent(in) :: p(*), q
+    integer (kind=4), intent(in) :: nparam, np
+    real (kind=8), intent(in) :: hparam(*)
+    real (kind=8), intent(inout) :: hs(0:np)
+    real (kind=8), intent(out) :: dist(0:np)
+    integer (kind=4) :: i
+    real (kind=8), save :: params(4), h_min, h_max
+    real (kind=8), save :: a1, a2, a3, sl1, sl2, sl3, h1, h2, h3, scale
 
-    qhot = 1./((1.+exp((p(3)-q)/p(4)))*(1.+exp((q-p(1))/p(2))))
+    data params /-2.6d0, 8.1d0, 0.666d0, 0.42d0/
+    data h_min /-1.d0/
+    data sl1 /0.13d0/, sl2 /0.7d0/
+    data h1 /2.5d0/, h2 /5.8d0/
+    data scale /2.2d0/
 
+!    print *, nparam
+!    print *, hparam(1:nparam)
+    h_max = hparam(nparam)
+    h3 = hparam(1)
+    a2 = scale*Variably_tapered_diff(h2, params)
+    a1 = a2*10.0d0**(sl2*(h1-h2))
+!    print *, a1, a2, a3, h3, h_max
+!    print *, scale*Variably_tapered_diff(h3, params), hparam(2)*scale*Variably_tapered_diff(h3, params)
+! The normalisation is done with the exponentially tapered exponential,
+! as fitted on the OSSOS cold component, then scaled by 2. This
+! determines the normalisation of the exponential between H = h2
+! and H = h1
+! N(<H) = n2*10**(sl2*(H-h2))
+! Then, there is an excess divot at h1. See
+! [[file:///home/petit/Research/OSSOS/tes/OSSOSpapers/Papers/GlobalLuminosityFunction/CumDiffDistributions.org]]
+    ! for the appropriate formula.
+    do i = 0, np
+       if (hs(i) .le. h_min) then
+          dist(i) = 0.0d0
+       else if (hs(i) .le. h1) then
+          dist(i) = a1*10.0d0**(sl1*(hs(i)-h1))
+       else if (hs(i) .le. h2) then
+          dist(i) = a2*10.0d0**(sl2*(hs(i)-h2))
+       else if (hs(i) .le. h3) then
+          dist(i) = scale*Variably_tapered_diff(hs(i), params)
+       else if (hs(i) .le. h_max) then
+          dist(i) = hparam(2)*scale*Variably_tapered_diff(hs(i), params)
+       else
+          dist(i) = 0.0d0
+       end if
+    end do
+    
     return
-  end function qhot
+  end subroutine H_diff_hot_6
+
+  real (kind=8) function H_draw_hot_6(seed, nparam, hparam)
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+! This routine draws randomly a number according to the hot belt H_r
+! distribution, represented by a differntial exponentially tapered exponential,
+! with parameters fitted on the OSSOS cold belt data, then scaled to
+! hot.
+!
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+!
+! J-M. Petit  Observatoire de Besancon
+! Version 1 : June 2024 - From H_dist_hot_5
+!
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+! INPUT
+!     seed  : Random number generator seed (I4)
+!     nparam: Number of parameters (I4)
+!     hparam: Parameters for asymptotic slope(s) (n*R8)
+!             hparam(1): start of asymptote
+!             hparam(2): contrast at divot
+!             hparam(3): end of distribution
+!
+! OUTPUT
+!     H_draw_hot_6 : Random value of H (R8)
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+!f2py intent(in,out) seed
+!f2py intent(in) nparam
+!f2py intent(in), depend(nparam) :: hparam
+    implicit none
+
+    integer (kind=4), parameter :: np = 16384
+    integer (kind=4), intent(inout) :: seed
+    integer (kind=4), intent(in) :: nparam
+    real (kind=8), intent(in) :: hparam(*)
+    integer (kind=4) :: i
+    real (kind=8), save :: random, h_min, h_max
+    real (kind=8), save :: proba(0:np), htab(0:np)
+    logical, save :: first
+
+    data first /.true./
+    data h_min /-1.d0/
+
+    if (first) then
+       h_max = hparam(nparam)
+       htab(0) = h_min
+       do i = 1, np
+          htab(i) = h_min + dfloat(i)*(h_max-h_min)/dfloat(np)
+       end do
+       call H_diff_hot_6(nparam, hparam, np, htab, proba)
+       proba(0) = 0.0d0
+       do i = 1, np
+          proba(i) = (proba(i)+proba(i-1))*(htab(i)-htab(i-1))/2.0d0 + proba(i-1)
+       end do
+       proba(0) = 1.0d-10
+       do i = 0, np
+          proba(i) = proba(i)/proba(np)
+       end do
+       first = .false.
+    end if
+
+    random = ran_3(seed)
+    H_draw_hot_6 = interp(proba, htab, random, np+1)
+
+  end function H_draw_hot_6
 
   real (kind=8) function interp (x, y, val, n)
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
