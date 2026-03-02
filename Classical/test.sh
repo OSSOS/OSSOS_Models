@@ -24,6 +24,7 @@ tail --lines=+3 ModelUsed-check-8.66.dat > zzz2
 diff zzz1 zzz2 > /dev/null 2>&1
 status=$?
 \rm -f zzz1 zzz2
+\rm -f OSSOS-model.out ModelUsed.dat
 if [ $status != 0 ]; then
     echo "================================================================="
     echo "=======================  Test FAILED!   ========================="
