@@ -197,7 +197,6 @@ contains
          ah_min, ah_max,        &! Lower and upper limit of a distribution
          a0sl, a1sl              ! Intermediate values for a distribution
     logical, save :: &
-         bool,                  &! Dummy logical value
          first                   ! Tells if first call to routine
     real (kind=8) :: &
          epoch_m,               &! Epoch of elements [JD]
