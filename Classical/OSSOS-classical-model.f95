@@ -116,7 +116,8 @@ contains
 ! INPUT
 !     seed  : Random number generator seed (I4)
 !     nmax  : -Maximum number of model objects, if < 0 (I4)
-!     hmax  : Maximum value of H for model objects [mag] (R8)
+!     hmax  : Maximum value of H for model objects - cannot be less than
+!             H_calib [mag] (R8)
 !     rec   : Do we want to record the objects ? (logical)
 !
 ! OUTPUT
@@ -211,6 +212,7 @@ contains
          fr_h, fr_k,            &! hot and warm
          hcut,                  &! Largest Hx value in debiased model
          h_calib,               &! H value for calibration
+         h_max,                 &! max(hmax, h_calib)
          h_params(60),          &! Parameters for the H distribution
          inc_f, node_f, peri_f, &! Free inclination and node and arg of peri
          i_ref, om_ref,         &! Coordinates of forced plane
@@ -286,8 +288,9 @@ contains
             10.0d0, 1.0d0, 0.4d0, 10.0d0, &
             10.0d0, 1.0d0, 0.4d0, 10.0d0, &
             10.0d0, 1.0d0, 0.4d0, 10.0d0]
-       h_params(1:16:4) = hmax
-       h_params(4:16:4) = hmax
+       h_max = max(hmax, h_calib)
+       h_params(1:16:4) = h_max
+       h_params(4:16:4) = h_max
 !       read (lun_m, *) fr_cl, fr_ch, fr_h, fr_k
        fr_cl = 0.280d0
        fr_ch = 0.290d0
@@ -340,7 +343,9 @@ contains
        write (lun_ll, '(a)') '# Classical population model.'
        write (lun_ll, '(a)') '# Version OSSOS 1.0, 2026-02-24'
        write (lun_ll, '(''#'')')
-       write (lun_ll, '(a)') '# Epoch:'
+       write (lun_ll, '(a,1x,i10)') '# Seed:', seed
+       write (lun_ll, '(''#'')')
+       write (lun_ll, '(a,1x,f13.5)') '# Epoch:', epoch_m
        write (lun_ll, '(''#'')')
        write (lun_ll, '(a)') '# Debiased main belt model files:'
        do i = 1, nfiles
@@ -556,7 +561,7 @@ contains
             status='old')
        write(lun_ll, '(''#'')')
        write(lun_ll, '(a,f5.2,a,f13.0)') &
-            '# Total number of objects up to H =         ', hmax, ': ', &
+            '# Total number of objects up to H =         ', h_max, ': ', &
             rn_iter + dble(n_iter)
        write(lun_ll, '(a,f5.2,a,i10)') &
             '# Number of objects brighter than H_calib = ', h_calib, &
