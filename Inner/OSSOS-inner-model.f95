@@ -196,6 +196,7 @@ contains
          n_hits                  ! Number of draws wit H <= H_calib
     real (kind=8), save :: &
          h_calib,               &! H value for calibration
+         h_max,                 &! max(h_calib, hmax)
          h_params(60),          &! Parameters for the H distribution
          inc_f, node_f, peri_f, &! Free inclination and node and arg of peri
          i_ref, om_ref,         &! Coordinates of forced plane
@@ -250,8 +251,9 @@ contains
 ! hot
 !       read (lun_m, *) (h_params(i+0*n_h), i=1,n_h)
        h_params(1:4) = [10.5d0, 1.0d0, 0.4d0, 10.5d0]
-       h_params(1:4:4) = hmax
-       h_params(4:4:4) = hmax
+       h_max = max(h_calib, hmax)
+       h_params(1:4:4) = h_max
+       h_params(4:4:4) = h_max
        comp = 1
 !       read (lun_m, *) (param(comp*10+i),i=1,2)
        param(comp*10+1:comp*10+2) = [0.0d0, 14.0d0]
@@ -284,7 +286,9 @@ contains
        write (lun_ll, '(a)') '# Inner population model.'
        write (lun_ll, '(a)') '# Version OSSOS 1.0, 2026-02-25'
        write (lun_ll, '(''#'')')
-       write (lun_ll, '(a)') '# Epoch:'
+       write (lun_ll, '(a,1x,i10)') '# Seed:', seed
+       write (lun_ll, '(''#'')')
+       write (lun_ll, '(a,1x,f13.5)') '# Epoch:', epoch_m
        write (lun_ll, '(''#'')')
        write (lun_ll, '(a,10(1x,f5.2))') &
             '# Colors for hot: ', (colorH(i),i=1,10)
@@ -420,7 +424,7 @@ contains
             status='old')
        write(lun_ll, '(''#'')')
        write(lun_ll, '(a,f5.2,a,f13.0)') &
-            '# Total number of objects up to H =         ', hmax, ': ', &
+            '# Total number of objects up to H =         ', h_max, ': ', &
             rn_iter + dble(n_iter)
        write(lun_ll, '(a,f5.2,a,i10)') &
             '# Number of objects brighter than H_calib = ', h_calib, &
