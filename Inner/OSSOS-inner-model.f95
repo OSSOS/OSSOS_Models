@@ -325,7 +325,7 @@ contains
 !
 ! Only 1 component, inner
     commen = 'inner_'
-    nchar = 9
+    nchar = 6
 !
 ! Draw inclination
 1150 continue
