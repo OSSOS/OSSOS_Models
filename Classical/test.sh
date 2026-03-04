@@ -7,7 +7,7 @@ make
 time ./Classical <<EOF
 123476790
 0
-8.0d0
+8.66d0
 .true.
 ./OSSOS-model.out
 EOF
