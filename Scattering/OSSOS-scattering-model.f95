@@ -81,14 +81,43 @@ contains
 ! This routine generates an object from a model parametric model of the
 ! outer/detached population.
 !
-! Version 1.0 draws (a, q, i, H) according to debiased detections;
-! reference frame is ecliptic.Uses small hyper-rectangle around objects.
-! Version 1.1 draws (a, q, i_free, H) according to debiased detections;
-! reference frame is forced plane. Fills the bias computation grid cells.
-! Version 1.2 draws (a, q, i_free, H) according to debiased detections;
-! reference frame is forced plane. Uses small hyper-rectangle around objects.
+! Version 1.0 draws according to a distributino of the form
+! P(a) x P(q) x P(i_free) x P(H_r).
 !
-! Version 9.0 need to explain.
+! P(a) = \left(\frac{a - a_{min}}{a_{max} - a_{min}}\right)^\alpha
+! with a_{min} = 30.0d0, a_{max} = 700.0d0 and \alpha = 0.9d0
+!
+! P(q) is defined as follows.
+! The extend of the $q$ distribution depends on $a$. So we first
+! scale according to $a$. The minimum value of $q$ is
+! $q_{min} = max(10, q_3 (a/a_3)^\beta)$,
+! with $\beta = log10(q_3/q_4)/log10(a_3/a_4)$,
+! $a_3 = 100$, $q_3 = 10$, $a_4 = 700$ and $q_4 = 40$
+! Given this,
+! - $P(q)$ is uniform between 10 and 20 with total fraction fr_1 = 0.040d0;
+!   if q_{min} > 10, then fr_1 is reduced according to reduced range
+! - $P(q)$ is uniform between 20 and 32 with total fraction fr_2 = 0.20d0;
+!   if q_{min} > 20, then fr_2 is reduced according to reduced range
+! - for the rest, $P(xq)$ is increasing as a power of xq with remaining fraction;
+!   xq in range [fr_1+fr_2; 1] corresponds linearly to q in range
+!   [max(32, q_{min}); q_{max}]
+! with:
+! \begin{displaymath}
+! \frac{xq - xq_0}{xq_1 - xq_0}= \frac{q-q_0}{q_1 \left(\frac{a}{a_1}\right)^\alpha - q_0}
+! \end{displaymath}
+! where $xq_0 = 0$, $xq_1 = 1$, $q_0 = q_{min}$,
+! q_{max} = 33.0d0*(a/43.0d0)^\alpha,
+! \alpha = Log(33.0d0/46.0d0)/Log(43.0d0/425.0d0)
+! All this has been determined empirically based on stability diagrams.
+!
+! P(i_free) is the usual Brown function of width 19°
+!
+! P(H_r) is the analytical size distribution for
+! hot from Petit et al. (2023), ApJL, 947:L4. Implementation: =H_draw_hot_6=.
+!
+! The other angles follow a factorized uniform probability.
+!
+! Input files and paramters for the model are hardcoded to avoid misuse.
 !
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 !
@@ -216,7 +245,7 @@ contains
 ! Sets initial values
     data &
          first /.true./,        &! First call
-         gb0     /-0.12d0/,     &! Opposition surge effect
+         gb0     / 0.15d0/,     &! Opposition surge effect
          ph0     / 0.00d0/,     &! Initial phase of lightcurve
          period0 / 0.60d0/,     &! Period of lightcurve
          amp0    / 0.00d0/       ! Amplitude of lightcurve (peak-to-peak)
@@ -476,7 +505,7 @@ contains
     data a1 /43.0d0/, qa1 /33.0d0/, a2 /425.0d0/, qa2 /46.0d0/, &
          a3 /100.0d0/, qa3 /10.0d0/, a4 /700.0d0/, qa4 /40.0d0/
     data q0 /10.0d0/, q1 /20.0d0/, q2 /32.0d0/
-    data fr1 /0.1d0/, fr2 /0.2d0/
+    data fr1 /0.1d0/, fr2 /0.2d0/, al /2.5d0/
     data first /.true./
 
     if (first) then
