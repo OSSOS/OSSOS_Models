@@ -92,8 +92,7 @@ contains
 ! 
 ! P(i_free) is the usual Brown function of width 14°
 !
-! P(H_r) is the analytical size distribution for cold from Kavelaars et al.
-! (2021), ApJL, 920:28 for cold, low-a; kernel and cold, high-a, and the one for
+! P(H_r) is the analytical size distribution for
 ! hot from Petit et al. (2023), ApJL, 947:L4. Implementation: =H_draw_hot_5=.
 !
 ! The other angles follow a factorized uniform probability.
