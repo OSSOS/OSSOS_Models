@@ -7,7 +7,7 @@ make
 time ./Scattering <<EOF
 123476990
 0
-8.0d0
+8.66d0
 .true.
 ./OSSOS-model.out
 EOF

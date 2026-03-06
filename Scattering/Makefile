@@ -20,5 +20,5 @@ clean:
 
 ../Commons/GiMeObj.f95:
 	\rm -f ../Commons/$(GIMEOBJ).f95 ../Commons/GiMeObj.f95
-	ln -s ../Classical/$(GIMEOBJ).f95 ../Commons/
+	ln -s ../Scattering/$(GIMEOBJ).f95 ../Commons/
 	ln -s $(GIMEOBJ).f95 ../Commons/GiMeObj.f95
