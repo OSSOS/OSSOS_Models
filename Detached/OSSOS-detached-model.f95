@@ -81,7 +81,23 @@ contains
 ! This routine generates an object from a model parametric model of the
 ! outer/detached population.
 !
-! Version 1.0
+! Version 1.0 draws according to a distributino of the form
+! P(a) x P(q) x P(i_free) x P(H_r).
+!
+! P(a) \propto a^{-3}, somewhat steeper than in CFEPS model.
+!
+! P(q) is a 3 piece-wise uniform distributions over consecutive ranges,
+!  [34.0d0, 35.5d0] with weight 0.080d0, [35.5d0, 39.0d0] with weight 0.580d0,
+!  and [39.0d0, 49.0d0] with weight 0.340d0.
+!
+! P(i_free) is the usual Brown function of width 18°
+!
+! P(H_r) is the analytical size distribution for
+! hot from Petit et al. (2023), ApJL, 947:L4. Implementation: =H_draw_hot_6=.
+!
+! The other angles follow a factorized uniform probability.
+!
+! Input files and paramters for the model are hardcoded to avoid misuse.
 !
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 !
@@ -427,8 +443,8 @@ contains
 
   real (kind=8) function det_q_n(seed, np, param)
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-! This function draws "q" according to np-1 uniform distributions over np-1
-! consecutive ranges, with given fraction in each range.
+! This function draws "q" according to (np-1)/2 uniform distributions over
+! (np-1)/2 consecutive ranges, with given fraction in each range.
 !
 ! BEWARE: sum(param(2:np:2) MUST be 1.0d0
 !
