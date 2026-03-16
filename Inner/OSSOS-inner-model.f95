@@ -97,7 +97,7 @@ contains
 !
 ! The other angles follow a factorized uniform probability.
 !
-! Input files and paramters for the model are hardcoded to avoid misuse.
+! Paramters for the model are hardcoded to avoid misuse.
 !
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 !
