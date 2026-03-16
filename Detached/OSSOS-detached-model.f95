@@ -82,7 +82,7 @@ contains
 ! outer/detached population.
 !
 ! Version 1.0 draws according to a distributino of the form
-! P(a) x P(q) x P(i_free) x P(H_r).
+! P(a) x P(q) x P(i_free) x P(H_r), based on Beaudoin et al. (2023), PSJ, 4:145.
 !
 ! P(a) \propto a^{-3}, somewhat steeper than in CFEPS model.
 !
@@ -97,7 +97,7 @@ contains
 !
 ! The other angles follow a factorized uniform probability.
 !
-! Input files and paramters for the model are hardcoded to avoid misuse.
+! Paramters for the model are hardcoded to avoid misuse.
 !
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 !
