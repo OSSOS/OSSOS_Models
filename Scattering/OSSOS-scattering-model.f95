@@ -110,7 +110,9 @@ contains
 ! \alpha = Log(33.0d0/46.0d0)/Log(43.0d0/425.0d0)
 ! All this has been determined empirically based on stability diagrams.
 !
-! P(i_free) is the usual Brown function of width 19°
+! P(i_free) is the usual Brown function of width 19°. It is refered to the
+! secular forced plane, accounting for inclination (hence close to invariable
+! plane for large inclinations).
 !
 ! P(H_r) is the analytical size distribution for
 ! hot from Petit et al. (2023), ApJL, 947:L4. Implementation: =H_draw_hot_6=.
