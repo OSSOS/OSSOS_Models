@@ -738,4 +738,41 @@ contains
     return
   end subroutine zero2pi
 
+  real (kind=8) function gasdev(x0,sigma,rs)
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+!  Given a center, width and seed return a value drawn from a gaussian
+!
+!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+    implicit none
+
+    real (kind=8), intent(in) :: x0, sigma
+    integer (kind=4), intent(inout) :: rs
+    integer (kind=4) :: iset
+    real (kind=8) :: v1, v2, rsq, gset
+    real (kind=8) :: fac, random
+    SAVE :: iset,gset
+
+    data iset /0/
+      
+    if  (iset.eq.0) then
+12     continue
+          random = ran_3(rs)
+          v1 = 2d0*random - 1d0
+          random = ran_3(rs)
+          v2 = 2d0*random - 1d0
+          rsq = v1*v1+v2*v2
+       if (rsq.ge.1.0) goto 12 
+
+       fac=sqrt(-2d0*log(rsq)/rsq)
+       gset=v1*fac
+       iset=1
+       gasdev=v2*fac*sigma+x0
+       return 
+    else
+       iset=0
+       gasdev=gset*sigma+x0
+       return
+    endif
+  end function gasdev
+
 end module modelutils
