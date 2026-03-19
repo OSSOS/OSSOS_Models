@@ -81,7 +81,34 @@ contains
 ! This routine generates an object from a model parametric model of the
 ! outer/detached population.
 !
-! Version 1.0 
+! Version 1.0 draws according to a distributino of the form
+! P(a) x P(e) x P(i_free) x P(H_r) x P(Res_amp) x P(\Phi_32), following Volk ...
+!
+! P(Res_amp) is a 3-piecewise uniform distribution from 10° to 50° to 120°
+! to to 160°, with fractions 0.14, 0.76, 0.10.
+!
+! P(\Phi_32) is sinusoidal with uniform phase and amplitude Res_amp, centered
+! on Pi.
+!
+! P(e) is a gaussian centered on ecent, with width ew, then truncated to range
+! [0; 0.4]
+!
+! P(a) is a triangular shape distribution whose min and max values are
+! e-dependent.
+!
+! P(a) x xP(e) is further modified by rejecting cases where q = a(1-e) < 22 au.
+!
+! P(i_free) is a Gamma function with parameters shape = p1 = 2.0° and
+! scale = p2 = 7.5°. It is refered to the orbital plane of Neptune at epoch.
+!
+! P(H_r) is the analytical size distribution for
+! hot from Petit et al. (2023), ApJL, 947:L4. Implementation: =H_draw_hot_6=.
+!
+! The other angles (mean anomaly M and longitude of node) follow a factorized
+! uniform probability. Argument of pericenter is computed from Phi_32, M,
+! \lambda_N and \Omega.
+!
+! Paramters for the model are hardcoded to avoid misuse.
 !
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 !
@@ -397,7 +424,7 @@ contains
     else
        a_min = 39.15d0 + (a_cent-39.15d0)*(o_m%e-0.2d0)/0.2d0
        a_max = 39.68d0 + (a_cent-39.68d0)*(o_m%e-0.2d0)/0.2d0
-    end if
+     end if
     random=ran_3(seed)
     alp = 0.4d0
     if (random .lt. 0.5d0) then
@@ -542,41 +569,6 @@ contains
     return
 
   end subroutine GiMeObj
-
-  real (kind=8) function gasdev(x0,sigma,rs)
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-!  Given a center, width and seed return a value drawn from a gaussian
-!
-!-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-    implicit none
-
-    real (kind=8), intent(in) :: x0, sigma
-    integer (kind=4), intent(inout) :: rs
-    integer (kind=4) :: iset
-    real (kind=8) :: v1, v2, rsq, gset
-    real (kind=8) :: fac, random
-    SAVE :: iset,gset
-      
-    if  (iset.eq.0) then
-12     continue
-          random = ran_3(rs)
-          v1 = 2d0*random - 1d0
-          random = ran_3(rs)
-          v2 = 2d0*random - 1d0
-          rsq = v1*v1+v2*v2
-       if (rsq.ge.1.0) goto 12 
-
-       fac=sqrt(-2d0*log(rsq)/rsq)
-       gset=v1*fac
-       iset=1
-       gasdev=v2*fac*sigma+x0
-       return 
-    else
-       iset=0
-       gasdev=gset*sigma+x0
-       return
-    endif
-  end function gasdev
 
   real (kind=8) function rand_gamma(shape, scale, rs)
 !-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
